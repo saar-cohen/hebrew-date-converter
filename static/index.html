@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hebrew Date Converter</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+           font-family: system-ui, sans-serif; background: #f1f5f9; }
+    .card { width: 360px; padding: 2rem; border-radius: 14px; background: #fff;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .08); text-align: center; }
+    h1 { margin: 0 0 1.5rem; font-size: 1.4rem; color: #1e293b; }
+    form { display: flex; gap: .5rem; }
+    input, button { font-size: 1rem; padding: .6rem .8rem; border-radius: 8px; }
+    input { flex: 1; border: 1px solid #cbd5e1; }
+    button { border: none; background: #2563eb; color: #fff; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    #result { min-height: 5rem; margin-top: 1.5rem; }
+    .hebrew { font-size: 2rem; font-weight: 700; color: #1e293b; }
+    .english { margin-top: .3rem; color: #64748b; }
+    .error { color: #dc2626; }
+    footer { font-size: .8rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Gregorian → Hebrew Date</h1>
+
+    <!-- type="date" lets the user type a date OR pick it from a calendar -->
+    <form id="form">
+      <input type="date" id="date" required>
+      <button type="submit">Convert</button>
+    </form>
+
+    <div id="result"></div>
+    <footer>Powered by <a href="https://www.hebcal.com">Hebcal.com</a></footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const dateInput = document.getElementById("date");
+    const result = document.getElementById("result");
+
+    // Default to today's local date in YYYY-MM-DD format
+    dateInput.value = new Date().toLocaleDateString("en-CA");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      result.textContent = "Converting...";
+
+      try {
+        const response = await fetch(`/api/convert?date=${dateInput.value}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+
+        result.innerHTML = `
+          <div class="hebrew" dir="rtl">${data.hebrew}</div>
+          <div class="english">${data.hebrew_english}</div>`;
+      } catch (error) {
+        result.innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
